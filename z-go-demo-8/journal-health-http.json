@@ -1,0 +1,106 @@
+{
+  "chaoslib-version": "1.23.1",
+  "platform": "Linux-4.19.0-18-cloud-amd64-x86_64-with-debian-10.11",
+  "node": "mgn",
+  "experiment": {
+    "version": "1.0.0",
+    "title": "What happens if we terminate an instance of the application?",
+    "description": "If an instance of the application is terminated, the applications as a whole should still be operational.",
+    "tags": [
+      "k8s",
+      "pod",
+      "http"
+    ],
+    "configuration": {
+      "ingress_host": {
+        "type": "env",
+        "key": "INGRESS_HOST"
+      }
+    },
+    "steady-state-hypothesis": {
+      "title": "The app is healthy",
+      "probes": [
+        {
+          "name": "app-responds-to-requests",
+          "type": "probe",
+          "tolerance": 200,
+          "provider": {
+            "type": "http",
+            "timeout": 3,
+            "verify_tls": false,
+            "url": "http://${ingress_host}/demo/person",
+            "headers": {
+              "Host": "go-demo-8.acme.com"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "terminate-app-pod",
+        "provider": {
+          "type": "python",
+          "module": "chaosk8s.pod.actions",
+          "func": "terminate_pods",
+          "arguments": {
+            "label_selector": "app=go-demo-8",
+            "rand": true,
+            "ns": "go-demo-8"
+          }
+        },
+        "pauses": {
+          "after": 2
+        }
+      }
+    ],
+    "dry": null
+  },
+  "start": "2022-01-27T04:46:43.866348",
+  "status": "failed",
+  "deviated": false,
+  "steady_states": {
+    "before": {
+      "steady_state_met": false,
+      "probes": [
+        {
+          "activity": {
+            "name": "app-responds-to-requests",
+            "type": "probe",
+            "tolerance": 200,
+            "provider": {
+              "type": "http",
+              "timeout": 3,
+              "verify_tls": false,
+              "url": "http://${ingress_host}/demo/person",
+              "headers": {
+                "Host": "go-demo-8.acme.com"
+              }
+            }
+          },
+          "output": {
+            "status": 404,
+            "headers": {
+              "date": "Thu, 27 Jan 2022 04:46:43 GMT",
+              "server": "istio-envoy",
+              "content-length": "0"
+            },
+            "body": ""
+          },
+          "status": "succeeded",
+          "start": "2022-01-27T04:46:43.867367",
+          "end": "2022-01-27T04:46:43.874286",
+          "duration": 0.006919,
+          "tolerance_met": false
+        }
+      ]
+    },
+    "after": null,
+    "during": []
+  },
+  "run": [],
+  "rollbacks": [],
+  "end": "2022-01-27T04:46:43.875141",
+  "duration": 0.009635686874389648
+}

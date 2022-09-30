@@ -1,0 +1,175 @@
+{
+  "chaoslib-version": "1.23.1",
+  "platform": "Linux-4.19.0-18-cloud-amd64-x86_64-with-debian-10.11",
+  "node": "mgn",
+  "experiment": {
+    "version": "1.0.0",
+    "title": "What happens if we drain a node",
+    "description": "All the instances are distributed among healthy nodes and the applications are healthy",
+    "tags": [
+      "k8s",
+      "deployment",
+      "node"
+    ],
+    "configuration": {
+      "node_label": {
+        "type": "env",
+        "key": "NODE_LABEL"
+      }
+    },
+    "steady-state-hypothesis": {
+      "title": "Nodes are indestructible",
+      "probes": [
+        {
+          "name": "all-apps-are-healthy",
+          "type": "probe",
+          "tolerance": true,
+          "provider": {
+            "type": "python",
+            "func": "all_pods_healthy",
+            "module": "chaosk8s.probes",
+            "arguments": {
+              "ns": "default"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "drain-node",
+        "provider": {
+          "type": "python",
+          "func": "drain_nodes",
+          "module": "chaosk8s.node.actions",
+          "arguments": {
+            "label_selector": "${node_label}",
+            "count": 1,
+            "pod_namespace": "default",
+            "delete_pods_with_local_storage": true
+          }
+        },
+        "pauses": {
+          "after": 1
+        }
+      }
+    ],
+    "dry": null
+  },
+  "start": "2022-02-02T13:03:49.017385",
+  "status": "failed",
+  "deviated": true,
+  "steady_states": {
+    "before": {
+      "steady_state_met": true,
+      "probes": [
+        {
+          "activity": {
+            "name": "all-apps-are-healthy",
+            "type": "probe",
+            "tolerance": true,
+            "provider": {
+              "type": "python",
+              "func": "all_pods_healthy",
+              "module": "chaosk8s.probes",
+              "arguments": {
+                "ns": "default"
+              }
+            }
+          },
+          "output": true,
+          "status": "succeeded",
+          "start": "2022-02-02T13:03:49.018733",
+          "end": "2022-02-02T13:03:49.082789",
+          "duration": 0.064056,
+          "tolerance_met": true
+        }
+      ]
+    },
+    "after": {
+      "steady_state_met": false,
+      "probes": [
+        {
+          "activity": {
+            "name": "all-apps-are-healthy",
+            "type": "probe",
+            "tolerance": true,
+            "provider": {
+              "type": "python",
+              "func": "all_pods_healthy",
+              "module": "chaosk8s.probes",
+              "arguments": {
+                "ns": "default"
+              }
+            }
+          },
+          "output": null,
+          "status": "failed",
+          "exception": [
+            "Traceback (most recent call last):\n",
+            "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/chaoslib/provider/python.py\", line 56, in run_python_activity\n    return func(**arguments)\n",
+            "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/chaosk8s/pod/probes.py\", line 299, in all_pods_healthy\n    raise ActivityFailed(\"the system is unhealthy\")\n",
+            "chaoslib.exceptions.ActivityFailed: the system is unhealthy\n",
+            "\nDuring handling of the above exception, another exception occurred:\n\n",
+            "chaoslib.exceptions.ActivityFailed: chaoslib.exceptions.ActivityFailed: the system is unhealthy\n"
+          ],
+          "start": "2022-02-02T13:03:50.591511",
+          "end": "2022-02-02T13:03:50.627357",
+          "duration": 0.035846,
+          "tolerance_met": false
+        }
+      ]
+    },
+    "during": []
+  },
+  "run": [
+    {
+      "activity": {
+        "type": "action",
+        "name": "drain-node",
+        "provider": {
+          "type": "python",
+          "func": "drain_nodes",
+          "module": "chaosk8s.node.actions",
+          "arguments": {
+            "label_selector": "${node_label}",
+            "count": 1,
+            "pod_namespace": "default",
+            "delete_pods_with_local_storage": true
+          }
+        },
+        "pauses": {
+          "after": 1
+        }
+      },
+      "output": null,
+      "status": "failed",
+      "exception": [
+        "Traceback (most recent call last):\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/chaosk8s/node/actions.py\", line 350, in drain_nodes\n    pod.metadata.name, pod.metadata.namespace, body=eviction\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/kubernetes/client/api/core_v1_api.py\", line 7606, in create_namespaced_pod_eviction\n    return self.create_namespaced_pod_eviction_with_http_info(name, namespace, body, **kwargs)  # noqa: E501\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/kubernetes/client/api/core_v1_api.py\", line 7723, in create_namespaced_pod_eviction_with_http_info\n    collection_formats=collection_formats)\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/kubernetes/client/api_client.py\", line 353, in call_api\n    _preload_content, _request_timeout, _host)\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/kubernetes/client/api_client.py\", line 184, in __call_api\n    _request_timeout=_request_timeout)\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/kubernetes/client/api_client.py\", line 397, in request\n    body=body)\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/kubernetes/client/rest.py\", line 280, in POST\n    body=body)\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/kubernetes/client/rest.py\", line 233, in request\n    raise ApiException(http_resp=r)\n",
+        "kubernetes.client.exceptions.ApiException: (429)\nReason: Too Many Requests\nHTTP response headers: HTTPHeaderDict({'Audit-Id': '204f10e1-52d1-4761-b936-2a0e4f79a027', 'Cache-Control': 'no-cache, private', 'Content-Type': 'application/json', 'X-Kubernetes-Pf-Flowschema-Uid': 'd3980b92-e02c-4d90-9ea3-e0962143438d', 'X-Kubernetes-Pf-Prioritylevel-Uid': '010233b2-bf36-4620-896e-c005d13637c1', 'Date': 'Wed, 02 Feb 2022 13:03:49 GMT', 'Content-Length': '320'})\nHTTP response body: {\"kind\":\"Status\",\"apiVersion\":\"v1\",\"metadata\":{},\"status\":\"Failure\",\"message\":\"Cannot evict pod as it would violate the pod's disruption budget.\",\"reason\":\"TooManyRequests\",\"details\":{\"causes\":[{\"reason\":\"DisruptionBudget\",\"message\":\"The disruption budget istiod needs 1 healthy pods and has 1 currently\"}]},\"code\":429}\n\n\n",
+        "\nDuring handling of the above exception, another exception occurred:\n\n",
+        "Traceback (most recent call last):\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/chaoslib/provider/python.py\", line 56, in run_python_activity\n    return func(**arguments)\n",
+        "  File \"/home/mgngcloud/.venvs/chaostk/lib/python3.7/site-packages/chaosk8s/node/actions.py\", line 354, in drain_nodes\n    f\"Failed to evict pod {pod.metadata.name}: {x.body}\"\n",
+        "chaoslib.exceptions.ActivityFailed: Failed to evict pod istiod-576d9f454-c8ss8: {\"kind\":\"Status\",\"apiVersion\":\"v1\",\"metadata\":{},\"status\":\"Failure\",\"message\":\"Cannot evict pod as it would violate the pod's disruption budget.\",\"reason\":\"TooManyRequests\",\"details\":{\"causes\":[{\"reason\":\"DisruptionBudget\",\"message\":\"The disruption budget istiod needs 1 healthy pods and has 1 currently\"}]},\"code\":429}\n\n",
+        "\nDuring handling of the above exception, another exception occurred:\n\n",
+        "chaoslib.exceptions.ActivityFailed: chaoslib.exceptions.ActivityFailed: Failed to evict pod istiod-576d9f454-c8ss8: {\"kind\":\"Status\",\"apiVersion\":\"v1\",\"metadata\":{},\"status\":\"Failure\",\"message\":\"Cannot evict pod as it would violate the pod's disruption budget.\",\"reason\":\"TooManyRequests\",\"details\":{\"causes\":[{\"reason\":\"DisruptionBudget\",\"message\":\"The disruption budget istiod needs 1 healthy pods and has 1 currently\"}]},\"code\":429}\n"
+      ],
+      "start": "2022-02-02T13:03:49.084098",
+      "end": "2022-02-02T13:03:49.588492",
+      "duration": 0.504394
+    }
+  ],
+  "rollbacks": [],
+  "end": "2022-02-02T13:03:50.627911",
+  "duration": 1.6114187240600586
+}
