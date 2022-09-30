@@ -1,0 +1,1 @@
+while true; do curl -s -o /dev/null -w "%{http_code} " http://20.106.205.234;sleep 2;done;

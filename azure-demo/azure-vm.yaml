@@ -1,0 +1,56 @@
+---
+title: azure vm stop
+description: azure vm stop
+tags:
+- azure
+configuration:
+  azure_subscription_id: "54009308-7031-4e52-a3a2-06b5951be7be"
+steady-state-hypothesis:
+  title: VM exists
+  probes:
+  - name: VM count is 1
+    type: probe
+    tolerance: 1
+    provider:
+      func: count_machines
+      module: chaosazure.machine.probes
+      type: python
+  title: is the url reachable?
+  probes:
+  - type: probe
+    name: url-reachable
+    tolerance: 200
+    provider:
+      type: http
+      timeout: 3
+      url: "http://20.106.205.234/"
+method:
+# - type: action
+#   name: restart vm
+#   provider:
+#     type: python
+#     func: restart_machines
+#     module: chaosazure.machine.actions
+#   pauses:
+#     after: 45
+- type: action
+  name: stop vm
+  provider:
+    type: python
+    func: stop_machines
+    module: chaosazure.machine.actions
+  pauses: 
+    after: 40
+rollbacks: 
+- type: action
+  name: start vm
+  provider:
+    type: python
+    func: start_machines
+    module: chaosazure.machine.actions
+# - type: action
+#   name: start vm
+#   provider:
+#     type: process
+#     path: az
+#     arguments: "vm start -g mgn_group -n mgnchaos"
