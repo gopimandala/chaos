@@ -1,0 +1,44 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bookinfo-standalone
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: bookinfo-job
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: bookinfo-chaos
+      restartPolicy: Never
+      containers:
+      - name: chaostoolkit
+        image: mgndocker/chaostoolkit:latest
+        args:
+        - --verbose
+        - run
+        - /experiment/bookinfo-abort.yaml
+        env:
+        - name: CHAOSTOOLKIT_IN_POD
+          value: "true"
+        - name: INGRESS_HOST
+          value: "34.73.137.113"
+        volumeMounts:
+        - name: config
+          mountPath: /experiment
+          readOnly: true
+        resources:
+          limits:
+            cpu: 20m
+            memory: 64Mi
+          requests:
+            cpu: 20m
+            memory: 64Mi
+      volumes:
+      - name: config
+        configMap:
+          name: bookinfo-config

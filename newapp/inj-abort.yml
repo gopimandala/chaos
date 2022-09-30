@@ -1,0 +1,28 @@
+version: 1.0.0
+title: What happens if we abort responses
+description: If responses are aborted, the dependant application should retry and/or timeout requests
+tags:
+- k8s
+- istio
+- http
+configuration:
+  ingress_host:
+      type: env
+      key: INGRESS_HOST
+method:
+- type: action
+  name: abort-failure
+  provider:
+    type: python
+    module: chaosistio.fault.actions
+    func: add_abort_fault
+    arguments:
+      virtual_service_name: newapp
+      http_status: 500
+      routes:
+        - destination:
+            host: newapp
+            subset: v1
+      percentage: 100
+      version: networking.istio.io/v1alpha3
+      ns: default

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: newapp-pod
+spec:
+  serviceAccountName: newapp-chaos
+  restartPolicy: Never
+  containers:
+  - name: chaostoolkit
+    image: vfarcic/chaostoolkit:1.4.1-2
+    args:
+    - --verbose
+    - run
+    - /experiment/health-http.yaml
+    env:
+    - name: CHAOSTOOLKIT_IN_POD
+      value: "true"
+    volumeMounts:
+    - name: config
+      mountPath: /experiment
+      readOnly: true
+    resources:
+      limits:
+        cpu: 20m
+        memory: 64Mi
+      requests:
+        cpu: 20m
+        memory: 64Mi
+  volumes:
+  - name: config
+    hostPath:
+      path: /home/mgngcloud/newapp/inp-http-health.yaml

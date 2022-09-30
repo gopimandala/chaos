@@ -1,0 +1,59 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: newapp-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "newapp.example.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: newapp
+spec:
+  hosts:
+  - "newapp.example.com"
+  gateways:
+  - newapp-gateway
+  - mesh
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: newapp
+        subset: v1
+      weight: 50
+    - destination:
+        host: newapp
+        subset: v2
+      weight: 50
+    # fault:
+    #   delay:
+    #     percentage:
+    #       value: 100
+    #     fixedDelay: 2s
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: newapp
+spec:
+  host: newapp
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2

@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: newapp
+spec:
+  hosts:
+  - "newapp.example.com"
+  gateways:
+  - newapp-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: newapp
+        subset: v1
+      weight: 50
+    - destination:
+        host: newapp
+        subset: v2
+      weight: 50
+      

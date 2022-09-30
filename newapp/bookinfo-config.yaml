@@ -1,0 +1,64 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookinfo-config
+data:
+  bookinfo-abort.yaml: |
+    version: 1.0.0
+    title: What happens if we abort and delay responses
+    description: If responses are aborted and delayed, the dependant application should retry and/or timeout requests
+    tags:
+    - k8s
+    - istio
+    - http
+    configuration:
+      ingress_host:
+          type: env
+          key: INGRESS_HOST
+    steady-state-hypothesis:
+      title: The app is healthy
+      probes:
+      - type: probe
+        name: app-responds-to-requests
+        tolerance: 200
+        provider:
+          type: http
+          timeout: 3
+          verify_tls: false
+          url: http://${ingress_host}/productpage
+    method:
+    - type: action
+      name: add-abort
+      provider:
+        type: python
+        module: chaosistio.fault.actions
+        func: add_abort_fault
+        arguments:
+          virtual_service_name: reviews
+          http_status: 500
+          routes:
+            - destination:
+                host: reviews
+                subset: v3
+          percentage: 100
+          version: networking.istio.io/v1alpha3
+          ns: default
+      pauses:
+        after: 20
+    rollbacks:
+    - type: action
+      name: remove-abort
+      provider:
+        type: python
+        module: chaosistio.fault.actions
+        func: remove_abort_fault
+        arguments:
+          virtual_service_name: reviews
+          routes:
+            - destination:
+                host: reviews
+                subset: v3
+          version: networking.istio.io/v1alpha3
+          ns: default
+    

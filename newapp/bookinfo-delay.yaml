@@ -1,0 +1,56 @@
+version: 1.0.0
+title: What happens if we abort and delay responses
+description: If responses are aborted and delayed, the dependant application should retry and/or timeout requests
+tags:
+- k8s
+- istio
+- http
+configuration:
+  ingress_host:
+      type: env
+      key: INGRESS_HOST
+steady-state-hypothesis:
+  title: The app is healthy
+  probes:
+  - type: probe
+    name: app-responds-to-requests
+    tolerance: 200
+    provider:
+      type: http
+      timeout: 3
+      verify_tls: false
+      url: http://${ingress_host}/productpage
+method:
+- type: action
+  name: delay
+  provider:
+    type: python
+    module: chaosistio.fault.actions
+    func: add_delay_fault
+    arguments:
+      virtual_service_name: reviews
+      fixed_delay: 2s
+      routes:
+        - destination:
+            host: reviews
+            subset: v1
+      percentage: 100
+      version: networking.istio.io/v1alpha3
+      ns: default
+  pauses:
+    after: 45
+rollbacks:
+- type: action
+  name: remove-delay
+  provider:
+    type: python
+    module: chaosistio.fault.actions
+    func: remove_delay_fault
+    arguments:
+      virtual_service_name: reviews
+      routes:
+        - destination:
+            host: reviews
+            subset: v1
+      version: networking.istio.io/v1alpha3
+      ns: default

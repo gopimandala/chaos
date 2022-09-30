@@ -1,0 +1,32 @@
+version: 1.0.0
+title: Chaos-mgn - What is the impact of a missing file
+description: checks for a file, renames it to fail and then undoes the renaming
+tags:
+- missing-file
+- process
+steady-state-hypothesis:
+  title: file exists
+  probes:
+  - type: probe
+    name: file must exist
+    tolerance: 0
+    provider:
+      type: process
+      path: grep
+      arguments: key filecheck.txt
+method: 
+- type: action
+  name: rename-file
+  provider:
+    type: process
+    path: mv
+    arguments: filecheck.txt newfile.txt
+  pauses:
+     after: 2
+rollbacks:
+- type: action
+  name: undo-rename
+  provider:
+    type: process
+    path: mv
+    arguments: newfile.txt filecheck.txt

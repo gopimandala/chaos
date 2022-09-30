@@ -1,0 +1,410 @@
+{
+  "chaoslib-version": "1.23.1",
+  "platform": "Linux-4.19.0-18-cloud-amd64-x86_64-with-debian-10.11",
+  "node": "mgn",
+  "experiment": {
+    "version": "1.0.0",
+    "title": "What happens if we abort and delay responses",
+    "description": "If responses are aborted and delayed, the dependant application should retry and/or timeout requests",
+    "tags": [
+      "k8s",
+      "istio",
+      "http"
+    ],
+    "configuration": {
+      "ingress_host": {
+        "type": "env",
+        "key": "INGRESS_HOST"
+      }
+    },
+    "steady-state-hypothesis": {
+      "title": "The app is healthy",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "app-responds-to-requests",
+          "tolerance": 200,
+          "provider": {
+            "type": "http",
+            "timeout": 3,
+            "verify_tls": false,
+            "url": "http://${ingress_host}/productpage"
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "add-abort",
+        "provider": {
+          "type": "python",
+          "module": "chaosistio.fault.actions",
+          "func": "add_abort_fault",
+          "arguments": {
+            "virtual_service_name": "reviews",
+            "http_status": 507,
+            "routes": [
+              {
+                "destination": {
+                  "host": "reviews",
+                  "subset": "v3"
+                }
+              }
+            ],
+            "percentage": 100,
+            "version": "networking.istio.io/v1alpha3",
+            "ns": "default"
+          }
+        },
+        "pauses": {
+          "after": 40
+        }
+      }
+    ],
+    "rollbacks": [
+      {
+        "type": "action",
+        "name": "remove-abort",
+        "provider": {
+          "type": "python",
+          "module": "chaosistio.fault.actions",
+          "func": "remove_abort_fault",
+          "arguments": {
+            "virtual_service_name": "reviews",
+            "routes": [
+              {
+                "destination": {
+                  "host": "reviews",
+                  "subset": "v3"
+                }
+              }
+            ],
+            "version": "networking.istio.io/v1alpha3",
+            "ns": "default"
+          }
+        }
+      }
+    ],
+    "dry": null
+  },
+  "start": "2022-02-22T12:22:49.785042",
+  "status": "completed",
+  "deviated": false,
+  "steady_states": {
+    "before": {
+      "steady_state_met": true,
+      "probes": [
+        {
+          "activity": {
+            "type": "probe",
+            "name": "app-responds-to-requests",
+            "tolerance": 200,
+            "provider": {
+              "type": "http",
+              "timeout": 3,
+              "verify_tls": false,
+              "url": "http://${ingress_host}/productpage"
+            }
+          },
+          "output": {
+            "status": 200,
+            "headers": {
+              "content-type": "text/html; charset=utf-8",
+              "content-length": "4183",
+              "server": "istio-envoy",
+              "date": "Tue, 22 Feb 2022 12:22:49 GMT",
+              "x-envoy-upstream-service-time": "39"
+            },
+            "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Simple Bookstore App</title>\n<meta charset=\"utf-8\">\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n\n<!-- Latest compiled and minified CSS -->\n<link rel=\"stylesheet\" href=\"static/bootstrap/css/bootstrap.min.css\">\n\n<!-- Optional theme -->\n<link rel=\"stylesheet\" href=\"static/bootstrap/css/bootstrap-theme.min.css\">\n\n  </head>\n  <body>\n    \n    \n\n<nav class=\"navbar navbar-inverse navbar-static-top\">\n  <div class=\"container\">\n    <div class=\"navbar-header\">\n      <a class=\"navbar-brand\" href=\"#\">BookInfo Sample</a>\n    </div>\n    \n    <button type=\"button\" class=\"btn btn-default navbar-btn navbar-right\" data-toggle=\"modal\" href=\"#login-modal\">Sign\n      in</button>\n    \n  </div>\n</nav>\n\n<!---\n<div class=\"navbar navbar-inverse navbar-fixed-top\">\n  <div class=\"container\">\n    <div class=\"navbar-header pull-left\">\n      <a class=\"navbar-brand\" href=\"#\">Microservices Fabric BookInfo Demo</a>\n    </div>\n    <div class=\"navbar-header pull-right\">\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\n        <span class=\"icon-bar\"></span>\n        <span class=\"icon-bar\"></span>\n        <span class=\"icon-bar\"></span>\n      </button>\n    </div>\n    <div class=\"navbar-collapse collapse\">\n\n      <button type=\"button\" class=\"btn btn-default navbar-btn pull-right\" data-toggle=\"modal\" data-target=\"#login-modal\">Sign in</button>\n\n    </div>\n  </div>\n</div>\n-->\n\n<div id=\"login-modal\" class=\"modal fade\" role=\"dialog\">\n  <div class=\"modal-dialog\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>\n        <h4 class=\"modal-title\">Please sign in</h4>\n      </div>\n      <div class=\"modal-body\">\n        <form method=\"post\" action='login' name=\"login_form\">\n          <p><input type=\"text\" class=\"form-control\" name=\"username\" id=\"username\" placeholder=\"User Name\"></p>\n          <p><input type=\"password\" class=\"form-control\" name=\"passwd\" placeholder=\"Password\"></p>\n          <p>\n            <button type=\"submit\" class=\"btn btn-primary\">Sign in</button>\n            <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Cancel</button>\n          </p>\n        </form>\n      </div>\n    </div>\n\n  </div>\n</div>\n\n<div class=\"container-fluid\">\n  <div class=\"row\">\n    <div class=\"col-md-12\">\n      <h3 class=\"text-center text-primary\">The Comedy of Errors</h3>\n      \n      <p>Summary: <a href=\"https://en.wikipedia.org/wiki/The_Comedy_of_Errors\">Wikipedia Summary</a>: The Comedy of Errors is one of <b>William Shakespeare's</b> early plays. It is his shortest and one of his most farcical comedies, with a major part of the humour coming from slapstick and mistaken identity, in addition to puns and word play.</p>\n      \n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"col-md-6\">\n      \n      <h4 class=\"text-center text-primary\">Book Details</h4>\n      <dl>\n        <dt>Type:</dt>paperback\n        <dt>Pages:</dt>200\n        <dt>Publisher:</dt>PublisherA\n        <dt>Language:</dt>English\n        <dt>ISBN-10:</dt>1234567890\n        <dt>ISBN-13:</dt>123-1234567890\n      </dl>\n      \n    </div>\n\n    <div class=\"col-md-6\">\n      \n      <h4 class=\"text-center text-primary\">Book Reviews</h4>\n      \n      <blockquote>\n        <p>An extremely entertaining play by Shakespeare. The slapstick humour is refreshing!</p>\n        <small>Reviewer1</small>\n        \n      </blockquote>\n      \n      <blockquote>\n        <p>Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.</p>\n        <small>Reviewer2</small>\n        \n      </blockquote>\n      \n      \n    </div>\n  </div>\n</div>\n\n\n    \n<!-- Latest compiled and minified JavaScript -->\n<script src=\"static/jquery.min.js\"></script>\n\n<!-- Latest compiled and minified JavaScript -->\n<script src=\"static/bootstrap/js/bootstrap.min.js\"></script>\n\n<script type=\"text/javascript\">\n  $('#login-modal').on('shown.bs.modal', function () {\n    $('#username').focus();\n  });\n</script>\n\n  </body>\n</html>\n"
+          },
+          "status": "succeeded",
+          "start": "2022-02-22T12:22:49.786043",
+          "end": "2022-02-22T12:22:49.832212",
+          "duration": 0.046169,
+          "tolerance_met": true
+        }
+      ]
+    },
+    "after": {
+      "steady_state_met": true,
+      "probes": [
+        {
+          "activity": {
+            "type": "probe",
+            "name": "app-responds-to-requests",
+            "tolerance": 200,
+            "provider": {
+              "type": "http",
+              "timeout": 3,
+              "verify_tls": false,
+              "url": "http://${ingress_host}/productpage"
+            }
+          },
+          "output": {
+            "status": 200,
+            "headers": {
+              "content-type": "text/html; charset=utf-8",
+              "content-length": "3889",
+              "server": "istio-envoy",
+              "date": "Tue, 22 Feb 2022 12:23:30 GMT",
+              "x-envoy-upstream-service-time": "24"
+            },
+            "body": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>Simple Bookstore App</title>\n<meta charset=\"utf-8\">\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n\n<!-- Latest compiled and minified CSS -->\n<link rel=\"stylesheet\" href=\"static/bootstrap/css/bootstrap.min.css\">\n\n<!-- Optional theme -->\n<link rel=\"stylesheet\" href=\"static/bootstrap/css/bootstrap-theme.min.css\">\n\n  </head>\n  <body>\n    \n    \n\n<nav class=\"navbar navbar-inverse navbar-static-top\">\n  <div class=\"container\">\n    <div class=\"navbar-header\">\n      <a class=\"navbar-brand\" href=\"#\">BookInfo Sample</a>\n    </div>\n    \n    <button type=\"button\" class=\"btn btn-default navbar-btn navbar-right\" data-toggle=\"modal\" href=\"#login-modal\">Sign\n      in</button>\n    \n  </div>\n</nav>\n\n<!---\n<div class=\"navbar navbar-inverse navbar-fixed-top\">\n  <div class=\"container\">\n    <div class=\"navbar-header pull-left\">\n      <a class=\"navbar-brand\" href=\"#\">Microservices Fabric BookInfo Demo</a>\n    </div>\n    <div class=\"navbar-header pull-right\">\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\n        <span class=\"icon-bar\"></span>\n        <span class=\"icon-bar\"></span>\n        <span class=\"icon-bar\"></span>\n      </button>\n    </div>\n    <div class=\"navbar-collapse collapse\">\n\n      <button type=\"button\" class=\"btn btn-default navbar-btn pull-right\" data-toggle=\"modal\" data-target=\"#login-modal\">Sign in</button>\n\n    </div>\n  </div>\n</div>\n-->\n\n<div id=\"login-modal\" class=\"modal fade\" role=\"dialog\">\n  <div class=\"modal-dialog\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>\n        <h4 class=\"modal-title\">Please sign in</h4>\n      </div>\n      <div class=\"modal-body\">\n        <form method=\"post\" action='login' name=\"login_form\">\n          <p><input type=\"text\" class=\"form-control\" name=\"username\" id=\"username\" placeholder=\"User Name\"></p>\n          <p><input type=\"password\" class=\"form-control\" name=\"passwd\" placeholder=\"Password\"></p>\n          <p>\n            <button type=\"submit\" class=\"btn btn-primary\">Sign in</button>\n            <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Cancel</button>\n          </p>\n        </form>\n      </div>\n    </div>\n\n  </div>\n</div>\n\n<div class=\"container-fluid\">\n  <div class=\"row\">\n    <div class=\"col-md-12\">\n      <h3 class=\"text-center text-primary\">The Comedy of Errors</h3>\n      \n      <p>Summary: <a href=\"https://en.wikipedia.org/wiki/The_Comedy_of_Errors\">Wikipedia Summary</a>: The Comedy of Errors is one of <b>William Shakespeare's</b> early plays. It is his shortest and one of his most farcical comedies, with a major part of the humour coming from slapstick and mistaken identity, in addition to puns and word play.</p>\n      \n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"col-md-6\">\n      \n      <h4 class=\"text-center text-primary\">Book Details</h4>\n      <dl>\n        <dt>Type:</dt>paperback\n        <dt>Pages:</dt>200\n        <dt>Publisher:</dt>PublisherA\n        <dt>Language:</dt>English\n        <dt>ISBN-10:</dt>1234567890\n        <dt>ISBN-13:</dt>123-1234567890\n      </dl>\n      \n    </div>\n\n    <div class=\"col-md-6\">\n      \n      <h4 class=\"text-center text-primary\">Error fetching product reviews!</h4>\n      \n      <p>Sorry, product reviews are currently unavailable for this book.</p>\n      \n      \n    </div>\n  </div>\n</div>\n\n\n    \n<!-- Latest compiled and minified JavaScript -->\n<script src=\"static/jquery.min.js\"></script>\n\n<!-- Latest compiled and minified JavaScript -->\n<script src=\"static/bootstrap/js/bootstrap.min.js\"></script>\n\n<script type=\"text/javascript\">\n  $('#login-modal').on('shown.bs.modal', function () {\n    $('#username').focus();\n  });\n</script>\n\n  </body>\n</html>\n"
+          },
+          "status": "succeeded",
+          "start": "2022-02-22T12:23:29.979534",
+          "end": "2022-02-22T12:23:30.012356",
+          "duration": 0.032822,
+          "tolerance_met": true
+        }
+      ]
+    },
+    "during": []
+  },
+  "run": [
+    {
+      "activity": {
+        "type": "action",
+        "name": "add-abort",
+        "provider": {
+          "type": "python",
+          "module": "chaosistio.fault.actions",
+          "func": "add_abort_fault",
+          "arguments": {
+            "virtual_service_name": "reviews",
+            "http_status": 507,
+            "routes": [
+              {
+                "destination": {
+                  "host": "reviews",
+                  "subset": "v3"
+                }
+              }
+            ],
+            "percentage": 100,
+            "version": "networking.istio.io/v1alpha3",
+            "ns": "default"
+          }
+        },
+        "pauses": {
+          "after": 40
+        }
+      },
+      "output": {
+        "status": 200,
+        "body": {
+          "apiVersion": "networking.istio.io/v1alpha3",
+          "kind": "VirtualService",
+          "metadata": {
+            "annotations": {
+              "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"networking.istio.io/v1alpha3\",\"kind\":\"VirtualService\",\"metadata\":{\"annotations\":{},\"name\":\"reviews\",\"namespace\":\"default\"},\"spec\":{\"hosts\":[\"reviews\"],\"http\":[{\"route\":[{\"destination\":{\"host\":\"reviews\",\"subset\":\"v1\"},\"weight\":50},{\"destination\":{\"host\":\"reviews\",\"subset\":\"v3\"},\"weight\":50}]}]}}\n"
+            },
+            "creationTimestamp": "2022-02-20T13:16:10Z",
+            "generation": 126,
+            "managedFields": [
+              {
+                "apiVersion": "networking.istio.io/v1alpha3",
+                "fieldsType": "FieldsV1",
+                "fieldsV1": {
+                  "f:metadata": {
+                    "f:annotations": {
+                      ".": {},
+                      "f:kubectl.kubernetes.io/last-applied-configuration": {}
+                    }
+                  },
+                  "f:spec": {
+                    ".": {},
+                    "f:hosts": {}
+                  }
+                },
+                "manager": "kubectl-client-side-apply",
+                "operation": "Update",
+                "time": "2022-02-20T13:16:10Z"
+              },
+              {
+                "apiVersion": "networking.istio.io/v1alpha3",
+                "fieldsType": "FieldsV1",
+                "fieldsV1": {
+                  "f:spec": {
+                    "f:http": {}
+                  }
+                },
+                "manager": "OpenAPI-Generator",
+                "operation": "Update",
+                "time": "2022-02-20T13:41:45Z"
+              }
+            ],
+            "name": "reviews",
+            "namespace": "default",
+            "resourceVersion": "1309890",
+            "uid": "f9d2a9bc-3840-46b7-bf25-22c3331f31b1"
+          },
+          "spec": {
+            "hosts": [
+              "reviews"
+            ],
+            "http": [
+              {
+                "fault": {
+                  "abort": {
+                    "httpStatus": 507,
+                    "percentage": {
+                      "value": 100
+                    }
+                  }
+                },
+                "route": [
+                  {
+                    "destination": {
+                      "host": "reviews",
+                      "subset": "v1"
+                    },
+                    "weight": 50
+                  },
+                  {
+                    "destination": {
+                      "host": "reviews",
+                      "subset": "v3"
+                    },
+                    "weight": 50
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "headers": {
+          "Audit-Id": "fe9c9f02-d4ea-4345-93d5-6d1de2c3eb5c",
+          "Cache-Control": "no-cache, private",
+          "Content-Type": "application/json",
+          "X-Kubernetes-Pf-Flowschema-Uid": "1c375dee-4543-4a28-9fe2-10b182a109d4",
+          "X-Kubernetes-Pf-Prioritylevel-Uid": "6a906907-16b0-48eb-bf3d-49cf251ac799",
+          "Date": "Tue, 22 Feb 2022 12:22:49 GMT",
+          "Content-Length": "1431"
+        }
+      },
+      "status": "succeeded",
+      "start": "2022-02-22T12:22:49.832878",
+      "end": "2022-02-22T12:22:49.938267",
+      "duration": 0.105389
+    }
+  ],
+  "rollbacks": [
+    {
+      "activity": {
+        "type": "action",
+        "name": "remove-abort",
+        "provider": {
+          "type": "python",
+          "module": "chaosistio.fault.actions",
+          "func": "remove_abort_fault",
+          "arguments": {
+            "virtual_service_name": "reviews",
+            "routes": [
+              {
+                "destination": {
+                  "host": "reviews",
+                  "subset": "v3"
+                }
+              }
+            ],
+            "version": "networking.istio.io/v1alpha3",
+            "ns": "default"
+          }
+        }
+      },
+      "output": {
+        "status": 200,
+        "body": {
+          "apiVersion": "networking.istio.io/v1alpha3",
+          "kind": "VirtualService",
+          "metadata": {
+            "annotations": {
+              "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"networking.istio.io/v1alpha3\",\"kind\":\"VirtualService\",\"metadata\":{\"annotations\":{},\"name\":\"reviews\",\"namespace\":\"default\"},\"spec\":{\"hosts\":[\"reviews\"],\"http\":[{\"route\":[{\"destination\":{\"host\":\"reviews\",\"subset\":\"v1\"},\"weight\":50},{\"destination\":{\"host\":\"reviews\",\"subset\":\"v3\"},\"weight\":50}]}]}}\n"
+            },
+            "creationTimestamp": "2022-02-20T13:16:10Z",
+            "generation": 127,
+            "managedFields": [
+              {
+                "apiVersion": "networking.istio.io/v1alpha3",
+                "fieldsType": "FieldsV1",
+                "fieldsV1": {
+                  "f:metadata": {
+                    "f:annotations": {
+                      ".": {},
+                      "f:kubectl.kubernetes.io/last-applied-configuration": {}
+                    }
+                  },
+                  "f:spec": {
+                    ".": {},
+                    "f:hosts": {}
+                  }
+                },
+                "manager": "kubectl-client-side-apply",
+                "operation": "Update",
+                "time": "2022-02-20T13:16:10Z"
+              },
+              {
+                "apiVersion": "networking.istio.io/v1alpha3",
+                "fieldsType": "FieldsV1",
+                "fieldsV1": {
+                  "f:spec": {
+                    "f:http": {}
+                  }
+                },
+                "manager": "OpenAPI-Generator",
+                "operation": "Update",
+                "time": "2022-02-20T13:41:45Z"
+              }
+            ],
+            "name": "reviews",
+            "namespace": "default",
+            "resourceVersion": "1310197",
+            "uid": "f9d2a9bc-3840-46b7-bf25-22c3331f31b1"
+          },
+          "spec": {
+            "hosts": [
+              "reviews"
+            ],
+            "http": [
+              {
+                "route": [
+                  {
+                    "destination": {
+                      "host": "reviews",
+                      "subset": "v1"
+                    },
+                    "weight": 50
+                  },
+                  {
+                    "destination": {
+                      "host": "reviews",
+                      "subset": "v3"
+                    },
+                    "weight": 50
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "headers": {
+          "Audit-Id": "b5967191-4726-42bc-87ff-543fd5328402",
+          "Cache-Control": "no-cache, private",
+          "Content-Type": "application/json",
+          "X-Kubernetes-Pf-Flowschema-Uid": "1c375dee-4543-4a28-9fe2-10b182a109d4",
+          "X-Kubernetes-Pf-Prioritylevel-Uid": "6a906907-16b0-48eb-bf3d-49cf251ac799",
+          "Date": "Tue, 22 Feb 2022 12:23:30 GMT",
+          "Content-Length": "1367"
+        }
+      },
+      "status": "succeeded",
+      "start": "2022-02-22T12:23:30.013401",
+      "end": "2022-02-22T12:23:30.523877",
+      "duration": 0.510476
+    }
+  ],
+  "end": "2022-02-22T12:23:30.524019",
+  "duration": 40.73964333534241
+}

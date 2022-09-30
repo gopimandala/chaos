@@ -1,0 +1,32 @@
+version: 1.0.0
+title: Terminate a standalone pod
+description: Terminate a standalone pod
+tags:
+- k8s
+- pod
+steady-state-hypothesis:
+  title: url-is-accessible
+  probes:
+  - name: app-responds-to-requests
+    type: probe
+    tolerance: 200
+    provider:
+      type: http
+      timeout: 5
+      verify_tls: false
+      url: http://34.73.191.116
+      headers:
+        Host: newapp.example.com
+method:
+- type: action
+  name: terminate-app-pod
+  provider:
+    type: python
+    module: chaosk8s.pod.actions
+    func: terminate_pods
+    arguments:
+      label_selector: app=chaos
+      rand: true
+      ns: demo
+  pauses: 
+    after: 15
