@@ -1,0 +1,59 @@
+---
+title: What is the impact of an expired certificate on our application chain?
+description: If a certificate expires, we should gracefully deal with the issue.
+tags:
+- tls
+configuration:
+  loc: "/home/mgngcloud/nonk8s/chaostoolkit-documentation-code/tutorials/demo"
+steady-state-hypothesis:
+  title: Application responds
+  probes: 
+  - type: probe
+    name: we-can-request-sunset
+    tolerance: 200
+    provider:
+      type: http
+      timeout: 3
+      verify_tls: false
+      url: https://localhost:8443/city/Paris
+method:   
+- type: action
+  name: swap-to-expired-cert
+  provider:
+    type: process
+    path: cp
+    arguments: expired-cert.pem cert.pem
+- type: probe
+  name: read-tls-cert-expiry-date
+  provider:
+    type: process
+    path: openssl
+    arguments: x509 -enddate -noout -in cert.pem
+- type: action
+  name: restart-astre
+  provider:
+    type: process
+    path: pkill
+    arguments: "--echo -HUP -F astre.pid"
+- type: action
+  name: restart-sunset
+  provider:
+    type: process
+    path: pkill
+    arguments: "--echo -HUP -F sunset.pid"
+- type: action
+  name: pause-for-50-secs
+  provider:
+    type: process
+    path: sleep
+    arguments: "50"
+rollbacks:
+- type: action
+  name: swap-to-valid-cert
+  provider:
+    type: process
+    path: cp
+    arguments: valid-cert.pem cert.pem
+- ref: read-tls-cert-expiry-date
+- ref: restart-astre
+- ref: restart-sunset

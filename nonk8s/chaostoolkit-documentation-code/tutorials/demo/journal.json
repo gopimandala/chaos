@@ -1,0 +1,231 @@
+{
+  "chaoslib-version": "1.25.0",
+  "platform": "Linux-4.19.0-18-cloud-amd64-x86_64-with-debian-10.11",
+  "node": "mgn",
+  "experiment": {
+    "title": "Injecting chaos through AWS FIS",
+    "description": "stress cpu & io",
+    "tags": [
+      "aws",
+      "cpu",
+      "io"
+    ],
+    "configuration": {
+      "aws_region": "us-east-1"
+    },
+    "steady-state-hypothesis": {
+      "title": "cpu-io-stress-thru-aws-fis",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "cpu-io-stress",
+          "tolerance": 200,
+          "provider": {
+            "type": "http",
+            "timeout": 3,
+            "url": "http://fis-lb-1221268919.us-east-1.elb.amazonaws.com"
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "start-experiment",
+        "provider": {
+          "arguments": {
+            "experiment_template_id": "EXTErfXpqvtNosW"
+          },
+          "func": "start_experiment",
+          "module": "chaosaws.fis.actions",
+          "type": "python"
+        },
+        "pauses": {
+          "after": 15
+        }
+      }
+    ],
+    "dry": null
+  },
+  "start": "2022-02-22T12:12:19.485613",
+  "status": "completed",
+  "deviated": false,
+  "steady_states": {
+    "before": {
+      "steady_state_met": true,
+      "probes": [
+        {
+          "activity": {
+            "type": "probe",
+            "name": "cpu-io-stress",
+            "tolerance": 200,
+            "provider": {
+              "type": "http",
+              "timeout": 3,
+              "url": "http://fis-lb-1221268919.us-east-1.elb.amazonaws.com"
+            }
+          },
+          "output": {
+            "status": 200,
+            "headers": {
+              "Date": "Tue, 22 Feb 2022 12:12:19 GMT",
+              "Content-Type": "text/html",
+              "Transfer-Encoding": "chunked",
+              "Connection": "keep-alive",
+              "Server": "nginx/1.18.0 (Ubuntu)",
+              "Last-Modified": "Mon, 14 Feb 2022 14:33:29 GMT",
+              "ETag": "W/\"620a6839-264\"",
+              "Content-Encoding": "gzip"
+            },
+            "body": "<!DOCTYPE html>\n<html>\n<head>\n<title>Welcome to nginx!</title>\n<style>\n    body {\n        width: 35em;\n        margin: 0 auto;\n        font-family: Tahoma, Verdana, Arial, sans-serif;\n    }\n</style>\n</head>\n<body>\n<h1>Welcome to nginx!</h1>\n<p>If you see this page, the nginx web server is successfully installed and\nworking. Further configuration is required.</p>\n\n<p>For online documentation and support please refer to\n<a href=\"http://nginx.org/\">nginx.org</a>.<br/>\nCommercial support is available at\n<a href=\"http://nginx.com/\">nginx.com</a>.</p>\n\n<p><em>Thank you for using nginx.</em></p>\n</body>\n</html>\n"
+          },
+          "status": "succeeded",
+          "start": "2022-02-22T12:12:19.486716",
+          "end": "2022-02-22T12:12:19.549571",
+          "duration": 0.062855,
+          "tolerance_met": true
+        }
+      ]
+    },
+    "after": {
+      "steady_state_met": true,
+      "probes": [
+        {
+          "activity": {
+            "type": "probe",
+            "name": "cpu-io-stress",
+            "tolerance": 200,
+            "provider": {
+              "type": "http",
+              "timeout": 3,
+              "url": "http://fis-lb-1221268919.us-east-1.elb.amazonaws.com"
+            }
+          },
+          "output": {
+            "status": 200,
+            "headers": {
+              "Date": "Tue, 22 Feb 2022 12:12:35 GMT",
+              "Content-Type": "text/html",
+              "Transfer-Encoding": "chunked",
+              "Connection": "keep-alive",
+              "Server": "nginx/1.18.0 (Ubuntu)",
+              "Last-Modified": "Mon, 14 Feb 2022 14:33:29 GMT",
+              "ETag": "W/\"620a6839-264\"",
+              "Content-Encoding": "gzip"
+            },
+            "body": "<!DOCTYPE html>\n<html>\n<head>\n<title>Welcome to nginx!</title>\n<style>\n    body {\n        width: 35em;\n        margin: 0 auto;\n        font-family: Tahoma, Verdana, Arial, sans-serif;\n    }\n</style>\n</head>\n<body>\n<h1>Welcome to nginx!</h1>\n<p>If you see this page, the nginx web server is successfully installed and\nworking. Further configuration is required.</p>\n\n<p>For online documentation and support please refer to\n<a href=\"http://nginx.org/\">nginx.org</a>.<br/>\nCommercial support is available at\n<a href=\"http://nginx.com/\">nginx.com</a>.</p>\n\n<p><em>Thank you for using nginx.</em></p>\n</body>\n</html>\n"
+          },
+          "status": "succeeded",
+          "start": "2022-02-22T12:12:35.769307",
+          "end": "2022-02-22T12:12:35.824777",
+          "duration": 0.05547,
+          "tolerance_met": true
+        }
+      ]
+    },
+    "during": []
+  },
+  "run": [
+    {
+      "activity": {
+        "type": "action",
+        "name": "start-experiment",
+        "provider": {
+          "arguments": {
+            "experiment_template_id": "EXTErfXpqvtNosW"
+          },
+          "func": "start_experiment",
+          "module": "chaosaws.fis.actions",
+          "type": "python"
+        },
+        "pauses": {
+          "after": 15
+        }
+      },
+      "output": {
+        "ResponseMetadata": {
+          "RequestId": "46626cb4-9a3e-422e-869d-17453ee0ad91",
+          "HTTPStatusCode": 200,
+          "HTTPHeaders": {
+            "date": "Tue, 22 Feb 2022 12:12:20 GMT",
+            "content-type": "application/json",
+            "content-length": "1626",
+            "connection": "keep-alive",
+            "x-amzn-requestid": "46626cb4-9a3e-422e-869d-17453ee0ad91",
+            "access-control-allow-origin": "*",
+            "access-control-allow-headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-Content-Sha256,X-Amz-User-Agent,*,Date,X-Amz-Target,content-type,x-amz-content-sha256,x-amz-user-agent,x-amzn-platform-id,x-amzn-trace-id",
+            "x-amz-apigw-id": "N8XtnEGeIAMF6Rg=",
+            "access-control-allow-methods": "POST",
+            "x-amzn-trace-id": "Root=1-6214d323-5cacb46b5341ccba61c3f386;Sampled=0"
+          },
+          "RetryAttempts": 0
+        },
+        "experiment": {
+          "id": "EXPhYDVtnz6gdVKQ7U",
+          "experimentTemplateId": "EXTErfXpqvtNosW",
+          "roleArn": "arn:aws:iam::224350923820:role/FisWorkshopServiceRole",
+          "state": {
+            "status": "initiating",
+            "reason": "Experiment is initiating."
+          },
+          "targets": {
+            "Instances-Target-1": {
+              "resourceType": "aws:ec2:instance",
+              "resourceArns": [
+                "arn:aws:ec2:us-east-1:224350923820:instance/i-01b02e91847a11db4"
+              ],
+              "selectionMode": "ALL"
+            }
+          },
+          "actions": {
+            "cpu-stress": {
+              "actionId": "aws:ssm:send-command",
+              "parameters": {
+                "documentArn": "arn:aws:ssm:us-east-1::document/AWSFIS-Run-CPU-Stress",
+                "documentParameters": "{\"DurationSeconds\":\"60\"}",
+                "duration": "PT1M"
+              },
+              "targets": {
+                "Instances": "Instances-Target-1"
+              },
+              "state": {
+                "status": "pending",
+                "reason": "Initial state"
+              }
+            },
+            "io-stress": {
+              "actionId": "aws:ssm:send-command",
+              "parameters": {
+                "documentArn": "arn:aws:ssm:us-east-1::document/AWSFIS-Run-IO-Stress",
+                "documentParameters": "{\"DurationSeconds\":\"60\"}",
+                "duration": "PT1M"
+              },
+              "targets": {
+                "Instances": "Instances-Target-1"
+              },
+              "state": {
+                "status": "pending",
+                "reason": "Initial state"
+              }
+            }
+          },
+          "stopConditions": [
+            {
+              "source": "none"
+            }
+          ],
+          "creationTime": "2022-02-22T12:12:20.205000+00:00",
+          "startTime": "2022-02-22T12:12:20.607000+00:00",
+          "tags": {}
+        }
+      },
+      "status": "succeeded",
+      "start": "2022-02-22T12:12:19.550262",
+      "end": "2022-02-22T12:12:20.753019",
+      "duration": 1.202757
+    }
+  ],
+  "rollbacks": [],
+  "end": "2022-02-22T12:12:35.825508",
+  "duration": 16.343630075454712
+}

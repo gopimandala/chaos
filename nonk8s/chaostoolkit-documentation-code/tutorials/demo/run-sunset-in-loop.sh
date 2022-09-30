@@ -1,0 +1,1 @@
+for i in {1..200}; do sh ./run-sunset.sh; done;

@@ -1,0 +1,1 @@
+curl lambda-lb-1229202045.us-east-1.elb.amazonaws.com

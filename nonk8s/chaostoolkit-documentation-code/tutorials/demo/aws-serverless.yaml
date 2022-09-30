@@ -1,0 +1,39 @@
+---
+title: What is the impact of lamdba timeout
+description: sets lambda timeout
+tags:
+- lambda-timeout
+configuration:
+  aws_region: us-east-1
+steady-state-hypothesis:
+  title: lambda-timeout
+  probes:
+  - type: probe
+    name: lambda-timeout
+    tolerance: 200
+    provider:
+      type: http
+      timeout: 3
+      url: "http://lambda-lb-1229202045.us-east-1.elb.amazonaws.com"
+method: 
+- type: action
+  name: put_function_timeout
+  provider:
+    type: python
+    module: chaosaws.awslambda.actions
+    func: put_function_timeout
+    arguments:
+      function_name: chaos-demo
+      timeout: 1
+  pauses: 
+    after: 3
+rollbacks:
+- type: action
+  name: put_function_timeout
+  provider:
+    type: python
+    module: chaosaws.awslambda.actions
+    func: put_function_timeout
+    arguments:
+      function_name: chaos-demo
+      timeout: 3

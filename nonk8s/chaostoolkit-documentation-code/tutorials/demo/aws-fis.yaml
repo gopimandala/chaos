@@ -1,0 +1,30 @@
+---
+title: Injecting chaos through AWS FIS
+description: stress cpu & io
+tags:
+- aws
+- cpu
+- io
+configuration:
+  aws_region: us-east-1
+steady-state-hypothesis:
+  title: cpu-io-stress-thru-aws-fis
+  probes:
+  - type: probe
+    name: cpu-io-stress
+    tolerance: 200
+    provider:
+      type: http
+      timeout: 3
+      url: "http://fis-lb-1221268919.us-east-1.elb.amazonaws.com"
+method: 
+- type: action
+  name: start-experiment
+  provider:
+    arguments:
+      experiment_template_id: 'EXTErfXpqvtNosW'
+    func: start_experiment
+    module: chaosaws.fis.actions
+    type: python
+  pauses: 
+    after: 15

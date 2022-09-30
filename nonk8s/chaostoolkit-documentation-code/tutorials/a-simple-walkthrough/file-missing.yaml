@@ -1,0 +1,37 @@
+version: 1.0.0
+title: Chaos-Tech-Talk - What is the impact of a missing file
+description: checks for a file, renames it to force fail and then undoes the renaming
+tags:
+- missing-file
+- process
+- python
+configuration:
+  loc: "/home/mgngcloud/.chaostoolkit"
+steady-state-hypothesis:
+  title: file exists
+  probes:
+  - type: probe
+    name: file must exist
+    tolerance: true
+    provider:
+      type: python
+      module: os.path
+      func: exists
+      arguments:
+        path: "${loc}/mysettings.yaml"
+method: 
+- type: action
+  name: rename-file
+  provider:
+    type: process
+    path: mv
+    arguments: "${loc}/mysettings.yaml ${loc}/newsettings.yaml"
+  pauses:
+     after: 15
+rollbacks:
+- type: action
+  name: undo-rename
+  provider:
+    type: process
+    path: mv
+    arguments: "${loc}/newsettings.yaml ${loc}/mysettings.yaml"

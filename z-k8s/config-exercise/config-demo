@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Config
+preferences: {}
+
+clusters:
+- cluster:
+  name: micro-cluster-1
+- cluster:
+  name: micro-cluster-2
+
+users:
+- name: developer
+- name: experimenter
+
+contexts:
+- context:
+  name: dev-frontend
+- context:
+  name: exp-scratch
